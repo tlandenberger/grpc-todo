@@ -5,7 +5,9 @@ package todo;
 option go_package = "./pb";
 
 service ToDoService {
+  rpc GetToDo (GetToDoRequest) returns (GetToDoResponse);
   rpc CreateToDo (CreateToDoRequest) returns (CreateToDoResponse);
+  rpc CompleteToDo (CompleteToDoRequest) returns (CompleteToDoResponse);
 }
 
 message ToDo {
@@ -15,10 +17,27 @@ message ToDo {
   bool done = 4;
 }
 
-message CreateToDoRequest {
+message GetToDoRequest {
+  string id = 1;
+}
+
+message GetToDoResponse {
   ToDo todo = 1;
 }
 
+message CreateToDoRequest {
+  string title = 1;
+  string description = 2;
+}
+
 message CreateToDoResponse {
+  ToDo todo = 1;
+}
+
+message CompleteToDoRequest {
+  string id = 1;
+}
+
+message CompleteToDoResponse {
   ToDo todo = 1;
 }

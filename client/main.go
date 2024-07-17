@@ -34,7 +34,7 @@ func main() {
 
 	conn, err := grpc.DialContext(ctx, *serverAddr, opts...)
 	if err != nil {
-		log.Fatalln("fail to dial:", err)
+		log.Fatalf("fail to dial:", err)
 	}
 	defer conn.Close()
 
@@ -46,7 +46,7 @@ func main() {
   }
   res, err := client.CreateToDo(ctx, &pb.CreateToDoRequest{Todo: todo})
 	if err != nil {
-		log.Fatalln("error sending request:", err)
+		log.Fatalf("error sending request:", err)
 	}
 
 	fmt.Println("result:", res);

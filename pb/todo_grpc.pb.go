@@ -19,14 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	ToDoService_CreateToDo_FullMethodName = "/todo.ToDoService/CreateToDo"
+	ToDoService_GetToDo_FullMethodName      = "/todo.ToDoService/GetToDo"
+	ToDoService_CreateToDo_FullMethodName   = "/todo.ToDoService/CreateToDo"
+	ToDoService_CompleteToDo_FullMethodName = "/todo.ToDoService/CompleteToDo"
 )
 
 // ToDoServiceClient is the client API for ToDoService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ToDoServiceClient interface {
+	GetToDo(ctx context.Context, in *GetToDoRequest, opts ...grpc.CallOption) (*GetToDoResponse, error)
 	CreateToDo(ctx context.Context, in *CreateToDoRequest, opts ...grpc.CallOption) (*CreateToDoResponse, error)
+	CompleteToDo(ctx context.Context, in *CompleteToDoRequest, opts ...grpc.CallOption) (*CompleteToDoResponse, error)
 }
 
 type toDoServiceClient struct {
@@ -35,6 +39,16 @@ type toDoServiceClient struct {
 
 func NewToDoServiceClient(cc grpc.ClientConnInterface) ToDoServiceClient {
 	return &toDoServiceClient{cc}
+}
+
+func (c *toDoServiceClient) GetToDo(ctx context.Context, in *GetToDoRequest, opts ...grpc.CallOption) (*GetToDoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetToDoResponse)
+	err := c.cc.Invoke(ctx, ToDoService_GetToDo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *toDoServiceClient) CreateToDo(ctx context.Context, in *CreateToDoRequest, opts ...grpc.CallOption) (*CreateToDoResponse, error) {
@@ -47,11 +61,23 @@ func (c *toDoServiceClient) CreateToDo(ctx context.Context, in *CreateToDoReques
 	return out, nil
 }
 
+func (c *toDoServiceClient) CompleteToDo(ctx context.Context, in *CompleteToDoRequest, opts ...grpc.CallOption) (*CompleteToDoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CompleteToDoResponse)
+	err := c.cc.Invoke(ctx, ToDoService_CompleteToDo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ToDoServiceServer is the server API for ToDoService service.
 // All implementations must embed UnimplementedToDoServiceServer
 // for forward compatibility
 type ToDoServiceServer interface {
+	GetToDo(context.Context, *GetToDoRequest) (*GetToDoResponse, error)
 	CreateToDo(context.Context, *CreateToDoRequest) (*CreateToDoResponse, error)
+	CompleteToDo(context.Context, *CompleteToDoRequest) (*CompleteToDoResponse, error)
 	mustEmbedUnimplementedToDoServiceServer()
 }
 
@@ -59,8 +85,14 @@ type ToDoServiceServer interface {
 type UnimplementedToDoServiceServer struct {
 }
 
+func (UnimplementedToDoServiceServer) GetToDo(context.Context, *GetToDoRequest) (*GetToDoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetToDo not implemented")
+}
 func (UnimplementedToDoServiceServer) CreateToDo(context.Context, *CreateToDoRequest) (*CreateToDoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateToDo not implemented")
+}
+func (UnimplementedToDoServiceServer) CompleteToDo(context.Context, *CompleteToDoRequest) (*CompleteToDoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompleteToDo not implemented")
 }
 func (UnimplementedToDoServiceServer) mustEmbedUnimplementedToDoServiceServer() {}
 
@@ -73,6 +105,24 @@ type UnsafeToDoServiceServer interface {
 
 func RegisterToDoServiceServer(s grpc.ServiceRegistrar, srv ToDoServiceServer) {
 	s.RegisterService(&ToDoService_ServiceDesc, srv)
+}
+
+func _ToDoService_GetToDo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetToDoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ToDoServiceServer).GetToDo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ToDoService_GetToDo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ToDoServiceServer).GetToDo(ctx, req.(*GetToDoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _ToDoService_CreateToDo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -93,6 +143,24 @@ func _ToDoService_CreateToDo_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ToDoService_CompleteToDo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteToDoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ToDoServiceServer).CompleteToDo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ToDoService_CompleteToDo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ToDoServiceServer).CompleteToDo(ctx, req.(*CompleteToDoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ToDoService_ServiceDesc is the grpc.ServiceDesc for ToDoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -101,8 +169,16 @@ var ToDoService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ToDoServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetToDo",
+			Handler:    _ToDoService_GetToDo_Handler,
+		},
+		{
 			MethodName: "CreateToDo",
 			Handler:    _ToDoService_CreateToDo_Handler,
+		},
+		{
+			MethodName: "CompleteToDo",
+			Handler:    _ToDoService_CompleteToDo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
